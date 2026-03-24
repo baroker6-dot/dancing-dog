@@ -10,8 +10,13 @@
 <body>
   <div class="game-container">
     <div class="score-card glass">
-      <h1>Dancing Dog</h1>
-      <p>Score: <span id="score">0</span></p>
+      <h1>💸 부자 랭킹 💸</h1>
+      <div class="leaderboard">
+        <div class="player">민주: <span id="score-민주">0</span>억</div>
+        <div class="player">지우: <span id="score-지우">0</span>억</div>
+        <div class="player">나라: <span id="score-나라">0</span>억</div>
+        <div class="player">수현: <span id="score-수현">0</span>억</div>
+      </div>
     </div>
     
     <!-- Premium SVG Dog Character -->
@@ -131,6 +136,15 @@
     </div>
 
     <div class="instructions">강아지를 클릭해서 춤추게 하세요! 🐶</div>
+  </div>
+
+  <!-- Random Character Reveal Modal -->
+  <div class="reveal-modal" id="revealModal">
+    <div class="glass modal-content">
+      <h2>🎉 벼락부자가 될 주인공은! 🎉</h2>
+      <div class="winner-name" id="winnerName">???</div>
+      <button id="closeBtn">다시 뽑기</button>
+    </div>
   </div>
 
   <script src="script.js"></script>

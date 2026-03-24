@@ -1,76 +1,95 @@
 const dog = document.getElementById('dog');
-const scoreElement = document.getElementById('score');
-let score = 0;
+const modal = document.getElementById('revealModal');
+const winnerNameEl = document.getElementById('winnerName');
+const closeBtn = document.getElementById('closeBtn');
+
 let danceTimer = null;
+let rainInterval = null;
 
-const emojis = ['✨', '💖', '🎵', '⭐', '🦴', '🐾'];
+const scores = {
+  '민주': 0,
+  '지우': 0,
+  '나라': 0,
+  '수현': 0
+};
 
+const moneyEmojis = ['💸', '💰', '💵', '🪙', '💎'];
+const candidates = ['민주', '지우', '나라', '수현'];
 const dances = ['dance-wave', 'dance-spin', 'dance-wiggle'];
 let currentDance = '';
 
-dog.addEventListener('click', (e) => {
-  // Update the score
-  score += 10;
-  scoreElement.textContent = score;
+// Close modal
+closeBtn.addEventListener('click', () => {
+  modal.classList.remove('show');
+});
 
-  // Add click scale effect dynamically to the score
-  scoreElement.style.transform = 'scale(1.4)';
-  setTimeout(() => scoreElement.style.transform = 'scale(1)', 150);
+dog.addEventListener('click', () => {
+  // If dog is already dancing or modal is open, ignore clicks
+  if (danceTimer || modal.classList.contains('show')) return;
 
-  // Clear existing dance if any
-  if (currentDance) {
-    dog.classList.remove(currentDance);
-  }
-
-  // Pick a random dance!
+  // Pick a random dance
   currentDance = dances[Math.floor(Math.random() * dances.length)];
-  
-  // Trigger SVG CSS animation
   dog.classList.add(currentDance);
 
-  // Create Particles
-  createParticles(e.clientX, e.clientY);
+  // Start money rain (spawn a money particle every 80ms)
+  rainInterval = setInterval(createMoneyRain, 80);
 
-  // Clear previous timer if clicked again while already dancing
-  if (danceTimer) {
-    clearTimeout(danceTimer);
-  }
-
-  // Set timeout to restore original state after 3 seconds
+  // Stop dancing and reveal winner after 3 seconds
   danceTimer = setTimeout(() => {
+    // 1. Stop dance
     dog.classList.remove(currentDance);
     currentDance = '';
     danceTimer = null;
+    
+    // 2. Stop money rain
+    clearInterval(rainInterval);
+    
+    // 3. Reveal Winner & Update Leaderboard Score
+    const winner = candidates[Math.floor(Math.random() * candidates.length)];
+    
+    // Add 10억 (10 Billion) per win
+    scores[winner] += 10; 
+    const scoreSpan = document.getElementById(`score-${winner}`);
+    scoreSpan.textContent = scores[winner];
+    
+    // Highlight the winner's score box briefly
+    const playerBox = scoreSpan.parentElement;
+    playerBox.style.transform = 'scale(1.3) translateY(-5px)';
+    playerBox.style.backgroundColor = 'rgba(255, 215, 0, 0.3)';
+    
+    setTimeout(() => {
+      playerBox.style.transform = '';
+      playerBox.style.backgroundColor = '';
+    }, 600);
+
+    winnerNameEl.textContent = winner;
+    modal.classList.add('show');
+    
   }, 3000);
 });
 
-function createParticles(x, y) {
-  // Generate 4-7 particles per click for a lush effect
-  const particleCount = Math.floor(Math.random() * 4) + 4;
+function createMoneyRain() {
+  const particle = document.createElement('div');
+  particle.classList.add('money-particle');
   
-  for (let i = 0; i < particleCount; i++) {
-    const particle = document.createElement('div');
-    particle.classList.add('particle');
-    
-    // Pick random emoji
-    particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-    
-    // Random position offset around cursor
-    const offsetX = (Math.random() - 0.5) * 80;
-    const offsetY = (Math.random() - 0.5) * 80;
-    
-    particle.style.left = `${x + offsetX}px`;
-    particle.style.top = `${y + offsetY}px`;
-    
-    // Random float duration between 0.8s and 1.3s
-    const duration = 0.8 + Math.random() * 0.5;
-    particle.style.animationDuration = `${duration}s`;
-    
-    document.body.appendChild(particle);
-    
-    // Cleanup
-    setTimeout(() => {
-      particle.remove();
-    }, duration * 1000);
-  }
+  // Pick random money emoji
+  particle.textContent = moneyEmojis[Math.floor(Math.random() * moneyEmojis.length)];
+  
+  // Random horizontal position across the entire viewport
+  particle.style.left = `${Math.random() * 100}vw`;
+  
+  // Random fall duration between 1.5s and 2.5s
+  const duration = 1.5 + Math.random() * 1.0;
+  particle.style.animationDuration = `${duration}s`;
+  
+  // Random size for depth effect
+  const size = 1 + Math.random() * 1.5;
+  particle.style.fontSize = `${size}rem`;
+  
+  document.body.appendChild(particle);
+  
+  // Cleanup particle after it falls past the screen
+  setTimeout(() => {
+    particle.remove();
+  }, duration * 1000);
 }
